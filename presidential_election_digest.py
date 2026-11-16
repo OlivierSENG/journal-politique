@@ -174,7 +174,7 @@ def build_digest(r):
 
 
 # ----------------------------- envoi -----------------------------
-def send_resend(digest, to, api_key, from_email="politique@resend.dev"):
+def send_resend(digest, to, api_key, from_email="onboarding@resend.dev"):
     import requests
     url = "https://api.resend.com/mail/send"
     body = render_body(digest)
@@ -269,7 +269,8 @@ def main():
     p.add_argument("--api-key", required=True,
                    help="clé API (Resend si préfixe 're_', sinon SendGrid)")
     p.add_argument("--emetteur", dest="from_email",
-                   help="expéditeur email (optionnel)", default=None)
+                   help="expéditeur email (optionnel, défaut onboarding@resend.dev)",
+                   default="onboarding@resend.dev")
     args = p.parse_args()
 
     digest = build_digest(gather_all())

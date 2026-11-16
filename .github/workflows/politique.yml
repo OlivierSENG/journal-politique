@@ -25,4 +25,4 @@ jobs:
           pip install -r requirements.txt
 
       - name: Résumé quotidien + envoi email
-        run: python politique_digest.py --to arfalan1337@gmail.com --api-key ${{ secrets.RESEND_API_KEY }}
+        run: python politique_digest.py --to arfalan1337@gmail.com --api-key ${{ secrets.RESEND_API_KEY }} --emetteur onboarding@resend.dev

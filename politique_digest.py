@@ -277,7 +277,8 @@ def main():
     p = argparse.ArgumentParser(description="Résumé quotidien de l'actualité politique France & Europe")
     p.add_argument("--out", help="écrire le résumé dans un fichier (au lieu d'envoyer)")
     p.add_argument("--to", help="destinataire email")
-    p.add_argument("--emetteur", dest="from_email", help="expéditeur email (optionnel)")
+    p.add_argument("--emetteur", dest="from_email", help="expéditeur email (optionnel)",
+                   default="onboarding@resend.dev")
     p.add_argument("--smtp-host", default="smtp.gmail.com")
     p.add_argument("--smtp-port", type=int, default=587)
     p.add_argument("--smtp-user", dest="smtp_user")
@@ -302,13 +303,13 @@ def main():
         print("[EMAIL]", "OK" if ok else f"ÉCHEC: {ok.get('error')}")
 
 def send_email(digest, to, api_key, from_email=None):
-    """Envoie l'email via l'API du fournisseur (Resend si la clé commence par 're_', sinon SendGrid)."""
+    # Envoie l'email via l'API du fournisseur (Resend si la clé commence par 're_', sinon SendGrid).
     import requests
 
     if api_key.startswith("re_"):
         url = "https://api.resend.com/mail/send"
         auth_header = f"Bearer {api_key}"
-        sender = from_email or "politique@resend.dev"
+        sender = from_email or "onboarding@resend.dev"
     else:
         url = "https://api.sendgrid.com/v3/mail/send"
         auth_header = f"Bearer {api_key}"
