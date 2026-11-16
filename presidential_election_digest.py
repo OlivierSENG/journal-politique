@@ -175,24 +175,25 @@ def build_digest(r):
 
 # ----------------------------- envoi -----------------------------
 def send_resend(digest, to, api_key, from_email="onboarding@resend.dev"):
-    import requests
-    url = "https://api.resend.com/mail/send"
-    body = render_body(digest)
-    payload = {
-        "from": {"email": from_email},
-        "to": [{"email": to}],
-        "subject": f"[Presidential France 2027] Résumé de l'actualité",
-        "text": body,
-    }
+    # Envoie l'email via la librairie Python resend.
     try:
-        r = requests.post(url, json=payload, headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        }, timeout=25)
-        if r.status_code in (200, 202):
+        import resend
+    except ImportError:
+        return {"ok": False, "error": "librairie 'resend' absente (pip install resend)"}
+
+    resend.api_key = api_key
+    body = render_body(digest)
+
+    try:
+        r = resend.Emails.send({
+            "from": from_email,
+            "to": to,
+            "subject": f"[Presidential France 2027] Résumé de l'actualité",
+            "text": body,
+        })
+        if r.get("id"):
             return {"ok": True}
-        return {"ok": False, "status": r.status_code,
-                "url": url, "body": r.text[:500]}
+        return {"ok": False, "error": f"réponse sans id : {r}"}
     except Exception as e:
         return {"ok": False, "error": f"{type(e).__name__}: {e}"}
 
@@ -267,7 +268,7 @@ def main():
     p = argparse.ArgumentParser(description="Résumé de l'actualité présidentielle 2027")
     p.add_argument("--to", required=True, help="destinataire email")
     p.add_argument("--api-key", required=True,
-                   help="clé API (Resend si préfixe 're_', sinon SendGrid)")
+                   help="clé API d'envoi (librairie resend)")
     p.add_argument("--emetteur", dest="from_email",
                    help="expéditeur email (optionnel, défaut onboarding@resend.dev)",
                    default="onboarding@resend.dev")

@@ -283,7 +283,7 @@ def main():
     p.add_argument("--smtp-port", type=int, default=587)
     p.add_argument("--smtp-user", dest="smtp_user")
     p.add_argument("--smtp-pass", dest="smtp_pass")
-    p.add_argument("--api-key", help="clé API d'envoi (Resend si préfixe 're_', sinon SendGrid)")
+    p.add_argument("--api-key", help="clé API d'envoi (librairie resend)")
 
     args = p.parse_args()
 
@@ -303,34 +303,26 @@ def main():
         print("[EMAIL]", "OK" if ok else f"ÉCHEC: {ok.get('error')}")
 
 def send_email(digest, to, api_key, from_email=None):
-    # Envoie l'email via l'API du fournisseur (Resend si la clé commence par 're_', sinon SendGrid).
-    import requests
+    # Envoie l'email via la librairie Python resend.
+    try:
+        import resend
+    except ImportError:
+        return {"ok": False, "error": "librairie 'resend' absente (pip install resend)"}
 
-    if api_key.startswith("re_"):
-        url = "https://api.resend.com/mail/send"
-        auth_header = f"Bearer {api_key}"
-        sender = from_email or "onboarding@resend.dev"
-    else:
-        url = "https://api.sendgrid.com/v3/mail/send"
-        auth_header = f"Bearer {api_key}"
-        sender = from_email or "noreply@localhost"
-
-    payload = {
-        "from": {"email": sender},
-        "to": [{"email": to}],
-        "subject": f"[Politique] Résumé France & Europe du {digest['date']}",
-        "text": render_body(digest),
-    }
+    resend.api_key = api_key
+    sender = from_email or "onboarding@resend.dev"
+    body = render_body(digest)
 
     try:
-        r = requests.post(url, json=payload, headers={
-            "Authorization": auth_header,
-            "Content-Type": "application/json",
-        }, timeout=25)
-        if r.status_code in (200, 202):
+        r = resend.Emails.send({
+            "from": sender,
+            "to": to,
+            "subject": f"[Politique] Résumé France & Europe du {digest['date']}",
+            "text": body,
+        })
+        if r.get("id"):
             return {"ok": True}
-        return {"ok": False, "status": r.status_code,
-                "url": url, "body": r.text[:500]}
+        return {"ok": False, "error": f"réponse sans id : {r}"}
     except Exception as e:
         return {"ok": False, "error": f"{type(e).__name__}: {e}"}
 
