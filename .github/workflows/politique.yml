@@ -1,0 +1,28 @@
+name: Journal politique France & Europe
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+      timezone: "Europe/Paris"
+
+jobs:
+  journal-quotidien:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout du dépôt
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install les dépendances
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Résumé quotidien + envoi email
+        run: python politique_digest.py --to arfalan1337@gmail.com --api-key ${{ secrets.RESEND_API_KEY }}
