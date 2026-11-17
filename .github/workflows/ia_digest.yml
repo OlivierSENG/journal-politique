@@ -5,16 +5,15 @@ on:
   # En été (UTC+2): ça sera 10h00 Paris — ajuster en décembre 2026 à 7:00 UTC
   schedule:
     - cron: "0 8 * * *"
-  workflow_dispatch:   # déclenchement manuel
 
-permissions:
-  contents: read
+
 
 jobs:
   ia-digest:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
+    permissions:
+      contents: read
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
@@ -22,7 +21,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Installer les dépendances
         run: |
