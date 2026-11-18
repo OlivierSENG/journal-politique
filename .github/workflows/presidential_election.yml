@@ -1,5 +1,4 @@
-name: Journal politique France & Europe
-
+name: Présidential election
 on:
   schedule:
     - cron: "0 9 * * *"
