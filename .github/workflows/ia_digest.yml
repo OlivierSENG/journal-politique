@@ -5,6 +5,7 @@ on:
   # En été (UTC+2): ça sera 10h00 Paris — ajuster en décembre 2026 à 7:00 UTC
   schedule:
     - cron: "0 8 * * *"
+  workflow_dispatch:
 
 
 
